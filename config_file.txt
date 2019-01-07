@@ -1,0 +1,4 @@
+interface lo10
+interface lo11
+interface lo12
+ 
