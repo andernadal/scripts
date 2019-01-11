@@ -1,6 +1,8 @@
 #!/usr/bin/expect -f
 set timeout 10
 set host [lindex $argv 0]
+
+#SSH connection using a jump server, change if it's necessary
 spawn ssh -o StrictHostKeyChecking=no admin@$host
 
 expect {
@@ -10,7 +12,7 @@ expect {
     send "Password_must_be_changed\r"
   }
 }
-
+#Check if it's necessary or not
 #expect "*?assword: "
 #send -- "MY_PASS\r"
 sleep 2
