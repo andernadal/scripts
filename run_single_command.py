@@ -14,7 +14,7 @@ elif len(sys.argv) == 2 :
 try:
     fc= open("comandos.txt","r")
 except:
-    print("Arquivo de comandos nao existe")
+    print("File comandos.txt not found!")
     sys.exit(1)
 
 USER = input("Enter username: ")
@@ -32,6 +32,7 @@ my_device = {
 try:
     net_connect = Netmiko(**my_device)
     net_connect.enable()
+    print("Connecting...  "+ HOST +"\n")
     try:
          for COMANDO in fc:
             output = net_connect.send_command(COMANDO)
@@ -39,10 +40,12 @@ try:
             print(output)
          fc.close()
     except:
-     print("Arquivo de comandos nao existe") 
+     print("File comandos.txt not found!") 
 except:
-     print("Erro na conexao") 
+     print("Failed connecting!") 
      sys.exit(1)
 
+print("Closing connections...")
 net_connect.disconnect()
+print("Done!")
 

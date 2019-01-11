@@ -5,130 +5,134 @@ import sys
 import time
 import datetime
 
-print("Iniciando:")
+print("Starting...")
 print(datetime.datetime.now())
 
-gerencia = MySQLdb.connect("localhost","radius","radiator","radius" )
-esp = MySQLdb.connect("localhost","esp","radiator","esp" )
-novanet = MySQLdb.connect("localhost","novanet","radiator","novanet" )
+try:
+    gerencia = MySQLdb.connect("host","user","password","database")
+    esp = MySQLdb.connect("host","user","password","database")
+    net = MySQLdb.connect("host","user","password","database")
 
-cursor_gerencia = gerencia.cursor()
-cursor_esp = esp.cursor()
-cursor_novanet = novanet.cursor()
+    cursor_gerencia = gerencia.cursor()
+    cursor_esp = esp.cursor()
+    cursor_net = net.cursor()
+except:
+    print("Failed connecting to MySQL Database!")
+    sys.exit(1)
 
-#Altera export para D, "Doing" e com isso impede que novos registros sejam manipulados
+#Change export do D, "DOING", freezing the record to manipulate
 sql_marca_esp = "UPDATE radius.radacct set export='D'  where export='N' and vrf='CGNAT_ESP' and acctstoptime is not NULL"
-sql_marca_novanet = "UPDATE radius.radacct set export='D'  where export='N' and vrf='CGNAT_NOVANET' and acctstoptime is not NULL"
+sql_marca_net = "UPDATE radius.radacct set export='D'  where export='N' and vrf='CGNAT_NET' and acctstoptime is not NULL"
 
 try:
-	print("Marcando registros")
+	print("Changing the record...")
 	cursor_gerencia.execute(sql_marca_esp)
-	cursor_gerencia.execute(sql_marca_novanet)
+	cursor_gerencia.execute(sql_marca_net)
 #	gerencia.commit()
 except: 
-	print("Falha na marcacao dos registros a serem manipulados")
+	print("Failed changing the record to manipulate!")
 	gerencia.rollback()
 	gerencia.close()
 	esp.close()
-	novanet.close()
+	net.close()
 	sys.exit(1)
 
 
 sql_select_esp = "SELECT acctsessionid, acctuniqueid, username, groupname, realm, nasipaddress, nasportid, nasporttype, acctstarttime, acctstoptime, acctsessiontime, acctauthentic, connectinfo_start, connectinfo_stop, acctinputoctets, acctoutputoctets, calledstationid, callingstationid, acctterminatecause, servicetype, framedprotocol, framedipaddress, acctstartdelay, acctstopdelay, xascendsessionsvrkey, framedip6address, framedinterfaceid, delegatedipv6prefix, framedip6addresscisco, vrf from radius.radacct where export='D' and vrf='CGNAT_ESP'"
 
 try:
-	print("Selecionando registros ESP:")
+	print("Selecting records - ESP...")
 	cursor_gerencia.execute(sql_select_esp)
 	count_esp = cursor_gerencia.rowcount
 	result_esp = cursor_gerencia.fetchall()
 	print(count_esp)
 except:
-	print("Falha na selecao dos registros a serem manipulados ESP")
+	print("Failed selecting records - ESP!")
 	gerencia.rollback()
 	gerencia.close()
 	esp.close()
-	novanet.close()
+	net.close()
 	sys.exit(1)
 	
 
-sql_select_novanet = "SELECT acctsessionid, acctuniqueid, username, groupname, realm, nasipaddress, nasportid, nasporttype, acctstarttime, acctstoptime, acctsessiontime, acctauthentic, connectinfo_start, connectinfo_stop, acctinputoctets, acctoutputoctets, calledstationid, callingstationid, acctterminatecause, servicetype, framedprotocol, framedipaddress, acctstartdelay, acctstopdelay, xascendsessionsvrkey, framedip6address, framedinterfaceid, delegatedipv6prefix, framedip6addresscisco, vrf from radius.radacct where export='D' and vrf='CGNAT_NOVANET'"
+sql_select_net = "SELECT acctsessionid, acctuniqueid, username, groupname, realm, nasipaddress, nasportid, nasporttype, acctstarttime, acctstoptime, acctsessiontime, acctauthentic, connectinfo_start, connectinfo_stop, acctinputoctets, acctoutputoctets, calledstationid, callingstationid, acctterminatecause, servicetype, framedprotocol, framedipaddress, acctstartdelay, acctstopdelay, xascendsessionsvrkey, framedip6address, framedinterfaceid, delegatedipv6prefix, framedip6addresscisco, vrf from radius.radacct where export='D' and vrf='CGNAT_NET'"
 
 try:
-	print("Selecionando registros Novanet:")
-	cursor_gerencia.execute(sql_select_novanet)
-	count_novanet = cursor_gerencia.rowcount
-	result_novanet = cursor_gerencia.fetchall()
-	print(count_novanet)
+	print("Selecting records - NET...")
+	cursor_gerencia.execute(sql_select_net)
+	count_net = cursor_gerencia.rowcount
+	result_net = cursor_gerencia.fetchall()
+	print(count_net)
 except:
-	print("Falha na selecao dos registros a serem manipulados Novanet")
+	print("Failed selecting records - NET!")
 	gerencia.rollback()
 	gerencia.close()
 	esp.close()
-	novanet.close()
+	net.close()
 	sys.exit(1)
 	
 
-#Insert na base ESP e Novanet
+#Insert na base ESP e net
 sql_insert_esp = "INSERT into esp.radacct (acctsessionid, acctuniqueid, username, groupname, realm, nasipaddress, nasportid, nasporttype, acctstarttime, acctstoptime, acctsessiontime, acctauthentic, connectinfo_start, connectinfo_stop, acctinputoctets, acctoutputoctets, calledstationid, callingstationid, acctterminatecause, servicetype, framedprotocol, framedipaddress, acctstartdelay, acctstopdelay, xascendsessionsvrkey, framedip6address, framedinterfaceid, delegatedipv6prefix, framedip6addresscisco, vrf) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
 controle_esp=2
 if count_esp >= 1 :
 	try: 
-		print("Migrando registros ESP:")
+		print("Migrating records - ESP...")
 		cursor_esp.executemany(sql_insert_esp,result_esp)
 		print(cursor_esp.rowcount)
 		controle_esp=0
-	except: 
-		print("Erro na atualizacao da base ESP")
+	except:
+		print("Failed migrating records - ESP!")
 		controle_esp=1
 else :
-	print("Sem registros para migrar na ESP")
+	print("No record to work!")
 
 
-sql_insert_novanet = "INSERT into novanet.radacct (acctsessionid, acctuniqueid, username, groupname, realm, nasipaddress, nasportid, nasporttype, acctstarttime, acctstoptime, acctsessiontime, acctauthentic, connectinfo_start, connectinfo_stop, acctinputoctets, acctoutputoctets, calledstationid, callingstationid, acctterminatecause, servicetype, framedprotocol, framedipaddress, acctstartdelay, acctstopdelay, xascendsessionsvrkey, framedip6address, framedinterfaceid, delegatedipv6prefix, framedip6addresscisco, vrf) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+sql_insert_net = "INSERT into net.radacct (acctsessionid, acctuniqueid, username, groupname, realm, nasipaddress, nasportid, nasporttype, acctstarttime, acctstoptime, acctsessiontime, acctauthentic, connectinfo_start, connectinfo_stop, acctinputoctets, acctoutputoctets, calledstationid, callingstationid, acctterminatecause, servicetype, framedprotocol, framedipaddress, acctstartdelay, acctstopdelay, xascendsessionsvrkey, framedip6address, framedinterfaceid, delegatedipv6prefix, framedip6addresscisco, vrf) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
 
-controle_novanet=2
+controle_net=2
 
-if count_novanet >= 1 :
+if count_net >= 1 :
 	try: 
-		print("Migrando registros Novanet:")
-		cursor_novanet.executemany(sql_insert_novanet,result_novanet)
-		print(cursor_novanet.rowcount)
-		controle_novanet=0
+		print("Migrating records - NET...")
+		cursor_net.executemany(sql_insert_net,result_net)
+		print(cursor_net.rowcount)
+		controle_net=0
 	except: 
-		print("Erro na atualizacao da base ESP")
-		controle_novanet=1
+		print("Failed migrating records - NET!")
+		controle_net=1
 else :
-	print("Sem registros para migrar na Novanet")
+	print("No record to work!")
 
 
 #Validando 
 if (controle_esp == 0 and count_esp >= 1) :
 	sql_update_esp = "UPDATE radius.radacct set export='Y' where export='D' and vrf='CGNAT_ESP'"
 	try:
-		print("Atualizando registros ESP")
+		print("Updating records - ESP...")
 		cursor_gerencia.execute(sql_update_esp)
 		gerencia.commit()
 		esp.commit()
 	except:
-		print("Erro na atualizacao dos valores da base gerencia")
+		print("Failed updating record - database gerencia!")
 		gerencia.rollback()
 		esp.rollback()
 
-if (controle_novanet == 0 and count_novanet >= 1) :
-	sql_update_novanet = "UPDATE radius.radacct set export='Y' where export='D' and vrf='CGNAT_NOVANET'"
+if (controle_net == 0 and count_net >= 1) :
+	sql_update_net = "UPDATE radius.radacct set export='Y' where export='D' and vrf='CGNAT_NET'"
 	try:
-		print("Atualizando registros Novanet")
-		cursor_gerencia.execute(sql_update_novanet)
+		print("Updating records - NET...")
+		cursor_gerencia.execute(sql_update_net)
 		gerencia.commit()
-		novanet.commit()
+		net.commit()
 	except:
+		print("Failed updating record - database gerencia!")
 		gerencia.rollback()
-		novanet.rollback()
+		net.rollback()
 
-#Fechando tudo
+print("Closing connections...")
 gerencia.close()
 esp.close()
-novanet.close()
-
-print("Finalizando:")
+net.close()
 print(datetime.datetime.now())
+print("Done!")

@@ -19,7 +19,7 @@ else:
 try:
     fd= open("devices.txt","r")
 except:
-    print("Arquivo de devices nao existe")
+    print("File devices.txt not found!")
     sys.exit(1)
 
 USER = input("Enter username: ")
@@ -33,16 +33,16 @@ for HOST in fd:
         try:
             log_file = open(HOST + ".log", "w")
         except:
-            print("Erro na criacao do arquivo de log")
+            print("Failed creating log file!")
             sys.exit(1)
 
     try:
         fc = open("comandos.txt", "r")
     except:
-        print("Arquivo de comandos nao existe")
+        print("File comandos.txt not found!")
         sys.exit(1)
 
-    print("Conexao ao "+ HOST +"\n")
+    print("Connecting...  "+ HOST +"\n")
 
     my_device = {
         'ip': HOST,
@@ -72,15 +72,16 @@ for HOST in fd:
 
             net_connect.disconnect()
         except:
-            print("Erro ao enviar comandos")
+            print("Failed sending commands!")
             net_connect.disconnect()
             sys.exit(1)
     except:
-        print("Erro na conexao")
+        print("Failed connecting!")
         sys.exit(1)
 
-#    print("Conexao executada com sucesso\n")
 
+print("Closing connections...")
 fd.close()
 fc.close()
+print("Done!")
 
