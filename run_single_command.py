@@ -1,15 +1,25 @@
 import sys
 import logging
-
 from netmiko import Netmiko
 from getpass import getpass
+import ip_functions 
+
 
 #logging.basicConfig(filename='test.log', level=logging.DEBUG)
 #logger = logging.getLogger("netmiko")
+
 if len(sys.argv) == 1 :
     HOST = input("Enter hostname: ")
 elif len(sys.argv) == 2 :
     HOST = sys.argv[1]
+
+if(ip_functions.lookup(HOST) != 0):
+    print("Host not found!")
+    sys.exit(1)
+
+if(ip_functions.ping(HOST) != 0):
+    print("Host not reachable via ICMP!")
+    sys.exit(1)
 
 try:
     fc= open("comandos.txt","r")

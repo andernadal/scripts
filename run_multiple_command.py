@@ -4,6 +4,7 @@ import getpass
 import time
 from netmiko import Netmiko
 from getpass import getpass
+import ip_functions
 
 LOG = 0
 
@@ -26,58 +27,57 @@ USER = input("Enter username: ")
 PASSWORD = getpass("Enter password: ")
 
 for HOST in fd:
-
     HOST=HOST.strip()
+    if(ip_functions.lookup(HOST) != 0 or ip_functions.ping(HOST) != 0):
+        print(HOST,"not found or not reachable via ICMP!")
+    else:
 
-    if (LOG == 1):
+        if (LOG == 1):
+            try:
+                log_file = open(HOST + ".log", "w")
+            except:
+                print("Failed creating log file!")
+                sys.exit(1)
+
         try:
-            log_file = open(HOST + ".log", "w")
+            fc = open("comandos.txt", "r")
         except:
-            print("Failed creating log file!")
+            print("File comandos.txt not found!")
             sys.exit(1)
 
-    try:
-        fc = open("comandos.txt", "r")
-    except:
-        print("File comandos.txt not found!")
-        sys.exit(1)
+        print("Connecting...  "+ HOST +"\n")
 
-    print("Connecting...  "+ HOST +"\n")
+        my_device = {
+            'ip': HOST,
+            'username': USER,
+            'password': PASSWORD,
+            'secret': PASSWORD,
+            'device_type': 'cisco_ios',
+                    }
+            #'global_delay_factor': 2,
 
-    my_device = {
-        'ip': HOST,
-        'username': USER,
-        'password': PASSWORD,
-        'secret': PASSWORD,
-        'device_type': 'cisco_ios',
-                }
-
-#'global_delay_factor': 2,
-
-    try:
-        net_connect = Netmiko(**my_device)
-        net_connect.enable()
         try:
-            for COMANDO in fc:
-                output = net_connect.send_command(COMANDO)
-                if (LOG == 1) :
-                 log_file.write(COMANDO)
-                 log_file.write(output)
-                else :
-                 print(COMANDO,"\n")
-                 print(output)
+            net_connect = Netmiko(**my_device)
+            net_connect.enable()
+            try:
+                for COMANDO in fc:
+                    output = net_connect.send_command(COMANDO)
+                    if (LOG == 1) :
+                        log_file.write(COMANDO)
+                        log_file.write(output)
+                    else :
+                        print(COMANDO,"\n")
+                        print(output)
 
-            if (LOG == 1):
-                log_file.close()
+                if (LOG == 1):
+                    log_file.close()
 
-            net_connect.disconnect()
+                net_connect.disconnect()
+            except:
+                print("Failed sending commands!")
+                net_connect.disconnect()
         except:
-            print("Failed sending commands!")
-            net_connect.disconnect()
-            sys.exit(1)
-    except:
-        print("Failed connecting!")
-        sys.exit(1)
+            print("Failed connecting!")
 
 
 print("Closing connections...")
