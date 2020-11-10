@@ -36,7 +36,7 @@ my_device = {
     'password': PASSWORD,
     'secret': PASSWORD,
 #    'device_type': 'cisco_xr',
-    'device_type': 'extreme',
+    'device_type': 'juniper_junos',
 }
 
 try:

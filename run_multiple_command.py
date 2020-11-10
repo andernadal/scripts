@@ -2,6 +2,7 @@ import sys
 import logging
 import getpass
 import time
+from colorama import Fore, Back, Style
 from netmiko import Netmiko
 from getpass import getpass
 import ip_functions
@@ -20,7 +21,8 @@ else:
 try:
     fd= open("devices.txt","r")
 except:
-    print("File devices.txt not found!")
+    print(Fore.RED + "File devices.txt not found!")
+    print(Style.RESET_ALL)
     sys.exit(1)
 
 USER = input("Enter username: ")
@@ -29,30 +31,35 @@ PASSWORD = getpass("Enter password: ")
 for HOST in fd:
     HOST=HOST.strip()
     if(ip_functions.lookup(HOST) != 0 or ip_functions.ping(HOST) != 0):
-        print(HOST,"not found or not reachable via ICMP!")
+        print(Fore.RED + HOST,"not found or not reachable via ICMP!")
+        print(Style.RESET_ALL)
     else:
 
         if (LOG == 1):
             try:
                 log_file = open(HOST + ".log", "w")
             except:
-                print("Failed creating log file!")
+                print(Fore.RED + "Failed creating log file!")
+                print(Style.RESET_ALL)
                 sys.exit(1)
 
         try:
             fc = open("comandos.txt", "r")
         except:
-            print("File comandos.txt not found!")
+            print(Fore.RED + "File comandos.txt not found!")
+            print(Style.RESET_ALL)
             sys.exit(1)
 
-        print("Connecting...  "+ HOST +"\n")
+        print(Fore.CYAN + "Connecting...  "+ HOST +"\n")
+        print(Style.RESET_ALL)
 
         my_device = {
             'ip': HOST,
             'username': USER,
             'password': PASSWORD,
             'secret': PASSWORD,
-            'device_type': 'cisco_ios',
+#            'device_type': 'alcatel_aos',
+            'device_type': 'juniper_junos',
                     }
             #'global_delay_factor': 2,
 
@@ -74,10 +81,12 @@ for HOST in fd:
 
                 net_connect.disconnect()
             except:
-                print("Failed sending commands!")
+                print(Fore.RED + "Failed sending commands!")
+                print(Style.RESET_ALL)
                 net_connect.disconnect()
         except:
-            print("Failed connecting!")
+            print(Fore.RED + "Failed connecting!")
+            print(Style.RESET_ALL)
 
 
 print("Closing connections...")
