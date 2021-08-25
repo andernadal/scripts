@@ -1,3 +1,5 @@
 colorama
 netmiko
 scapy
+junos-eznc
+pandas
