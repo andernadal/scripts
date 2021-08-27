@@ -67,12 +67,19 @@ for HOST in fd:
                     print("Router Name",",","Item Name",",","Description",",","Serial Number",",","Part Number",",","Version",",","Model Number")
                     print(HOST,",",item.name,",",item.desc,",",item.sn)
 
-                    for i in [item.FPM, item.FDM, item.PEM, item.RE]:
+                    for i in [item.MDP, item.FPM, item.FDM, item.PEM, item.RE, item.CB]:
                         for j in i:
                             print(HOST,",",j.name,",",j.desc,",",j.sn,",",j.pn,",",j.ver,",",j.model)
                     for k in item.FPC:
                         print(HOST,",",k.name,",",k.desc,",",k.sn,",",k.pn,",",k.ver,",",j.model)
-                        for l in k.MIC:
+                        #colocar um if para ver se tem MIC ou PIC e seguir em frente
+                        if not k.MIC:
+                            for m in k.PIC:
+                                print(HOST,",",m.name,",",m.desc,",",m.sn,",",m.pn)
+                                for n in m.PORT:
+                                    print(HOST,",",n.name,",",n.desc,",",n.sn,",",n.pn,",",n.ver)
+                        else:
+                         for l in k.MIC:
                             print(HOST,",",l.name,",",l.desc,",",l.sn,",",l.pn,",",l.ver,",",j.model)
                             for m in l.PIC:
                                 print(HOST,",",m.name,",",m.desc,",",m.sn,",",m.pn)
@@ -80,6 +87,7 @@ for HOST in fd:
                                     print(HOST,",",n.name,",",n.desc,",",n.sn,",",n.pn,",",n.ver)
 
                  f.close()
+
         except:
                 sys.stdout = orig_stdout
                 f.close()
