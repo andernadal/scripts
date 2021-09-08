@@ -79,7 +79,9 @@ else:
         except:
                 sys.stdout = orig_stdout
                 print(Fore.RED + "Connection Fail !")
+                print(Fore.RED + "Clossing connections and exiting !")
                 print(Style.RESET_ALL)
+                sys.exit(1)
 
 sys.stdout = orig_stdout
 print(Fore.LIGHTBLUE_EX + "Closing connections...\n")

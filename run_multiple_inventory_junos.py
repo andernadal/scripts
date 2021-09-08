@@ -3,7 +3,6 @@ import logging
 import getpass
 import time
 from colorama import Fore, Back, Style
-#from netmiko import Netmiko
 from getpass import getpass
 import ip_functions
 from jnpr.junos import Device
@@ -72,7 +71,6 @@ for HOST in fd:
                             print(HOST,",",j.name,",",j.desc,",",j.sn,",",j.pn,",",j.ver,",",j.model)
                     for k in item.FPC:
                         print(HOST,",",k.name,",",k.desc,",",k.sn,",",k.pn,",",k.ver,",",j.model)
-                        #colocar um if para ver se tem MIC ou PIC e seguir em frente
                         if not k.MIC:
                             for m in k.PIC:
                                 print(HOST,",",m.name,",",m.desc,",",m.sn,",",m.pn)
